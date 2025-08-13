@@ -23,9 +23,9 @@ services:
       db:
         condition: service_healthy
     ports:
-      - "8020:8020"
+      - "8032:8032"
     command: >
-      bash -lc "gunicorn -w 4 -k gthread --threads 8 -t 60 -b 0.0.0.0:8020 app:app"
+      bash -lc "gunicorn -w 4 -k gthread --threads 8 -t 60 -b 0.0.0.0:8032 app:app"
 
 volumes:
   dbdata:
