@@ -1,0 +1,31 @@
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: ticket
+      POSTGRES_PASSWORD: ticketpass
+      POSTGRES_DB: ticketdb
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ticket -d ticketdb"]
+      interval: 2s
+      timeout: 2s
+      retries: 20
+
+  web:
+    build: .
+    environment:
+      DATABASE_URL: postgresql://ticket:ticketpass@db:5432/ticketdb
+      FLASK_ENV: production
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8020:8020"
+    command: >
+      bash -lc "gunicorn -w 4 -k gthread --threads 8 -t 60 -b 0.0.0.0:8020 app:app"
+
+volumes:
+  dbdata:
